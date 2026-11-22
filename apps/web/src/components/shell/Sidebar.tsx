@@ -18,6 +18,7 @@ import {
   LogOut,
   Scissors,
   Network,
+  Youtube,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '@/lib/stores/auth.store';
@@ -33,6 +34,7 @@ const NAV = [
   { href: '/subtitles', label: 'Subtitles', icon: Subtitles },
   { href: '/grading', label: 'Color Grading', icon: Palette },
   { href: '/media', label: 'Media Library', icon: Library },
+  { href: '/creator', label: 'Creator Toolkit', icon: Youtube },
   { href: '/render', label: 'Render Queue', icon: ListChecks },
   { href: '/mcp', label: 'MCP Integrations', icon: Bot },
   { href: '/settings', label: 'Settings', icon: Settings },

@@ -124,6 +124,7 @@ export const useProjects = create<ProjectState>((set, get) => ({
       if (patch.width !== undefined) payload.width = patch.width;
       if (patch.height !== undefined) payload.height = patch.height;
       if (patch.fps !== undefined) payload.fps = patch.fps;
+      if (patch.settings !== undefined) payload.settings = patch.settings;
       const { error } = await supabase.from('projects').update(payload).eq('id', projectId);
       if (error) throw error;
       set({ projects: get().projects.map((p) => (p.id === projectId ? { ...p, ...patch } : p)) });

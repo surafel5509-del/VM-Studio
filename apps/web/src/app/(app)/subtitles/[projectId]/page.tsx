@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation';
 import { useTimelineProject } from '@/lib/use-timeline-project';
 import { useAuth } from '@/lib/stores/auth.store';
 import { Button, Panel, Badge, Spinner, EmptyState, TextInput, Field } from '@/components/ui';
-import { Subtitles as SubtitlesIcon, Upload, Download, Trash2, Plus, Pencil, Save } from 'lucide-react';
+import { Subtitles as SubtitlesIcon, Upload, Download, Trash2, Plus, Pencil, Save, Volume2 } from 'lucide-react';
+import { speak, stopSpeaking, speechSupported, hasVoiceFor } from '@/lib/voiceover';
 import { parseSubtitles, serializeSrt, serializeVtt } from '@frameforge/shared';
 import type { SubtitleCue } from '@frameforge/shared';
 import { getSupabase } from '@/lib/supabase';
@@ -24,6 +25,7 @@ export default function SubtitlesPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<number | null>(null);
+  const [speaking, setSpeaking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // load existing document
@@ -119,6 +121,21 @@ export default function SubtitlesPage() {
     URL.revokeObjectURL(url);
   }
 
+  async function previewSpeech() {
+    if (speaking) { stopSpeaking(); setSpeaking(false); return; }
+    const text = cues.map((c) => c.text).filter(Boolean).join(' ');
+    if (!text) return;
+    const lang = language === 'am' ? 'am-ET' : language === 'en' ? 'en-US' : language.includes('-') ? language : `${language}-US`;
+    setSpeaking(true);
+    await speak(text, {
+      language: lang,
+      onStart: () => setSpeaking(true),
+      onEnd: () => setSpeaking(false),
+      onError: () => setSpeaking(false),
+    });
+    setSpeaking(false);
+  }
+
   const totalDuration = cues.length ? Math.max(...cues.map((c) => c.end)) : 0;
 
   return (
@@ -131,6 +148,7 @@ export default function SubtitlesPage() {
         <div className="flex gap-2">
           <input ref={inputRef} type="file" accept=".srt,.vtt" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void importFile(f); e.target.value = ''; }} />
           <Button variant="outline" className="text-xs" onClick={() => inputRef.current?.click()}><Upload className="h-3.5 w-3.5" /> Import SRT/VTT</Button>
+          <Button variant="subtle" className="text-xs" onClick={previewSpeech} disabled={cues.length === 0 || !speechSupported()} title={speechSupported() ? 'Read cues aloud (in-browser speech preview, not an export)' : 'Speech preview not supported in this browser'}><Volume2 className="h-3.5 w-3.5" /> {speaking ? 'Stop preview' : 'Preview speech'}</Button>
           <Button variant="subtle" className="text-xs" onClick={() => download('srt')} disabled={cues.length === 0}><Download className="h-3.5 w-3.5" /> SRT</Button>
           <Button variant="subtle" className="text-xs" onClick={() => download('vtt')} disabled={cues.length === 0}><Download className="h-3.5 w-3.5" /> VTT</Button>
           <Button variant="primary" className="text-xs" onClick={save} disabled={saving || !dirty}>{saving ? <Spinner className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />} Save</Button>
@@ -224,6 +242,10 @@ export default function SubtitlesPage() {
             <div className="text-center text-[10px] text-zinc-600">
               Languages: English and Amharic (am) supported natively by the player stack. Translation requires a speech/translation provider — not fabricated locally.
             </div>
+            {speaking && <div className="text-[10px] text-indigo-300">Reading aloud…</div>}
+            {language !== 'en' && !hasVoiceFor(language.slice(0, 2)) && (
+              <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[10px] text-amber-200">No {language.toUpperCase()} voice detected in this browser — preview may fall back to another voice.</div>
+            )}
           </div>
         </aside>
       </div>
