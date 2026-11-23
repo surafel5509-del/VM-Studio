@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "npm run dev --workspace apps/web",
     "build": "npm run build --workspaces --if-present",
+    "build:shared": "npm run build --workspace=@frameforge/shared",
     "test": "vitest run",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "mcp": "npm run dev --workspace apps/mcp-server"
