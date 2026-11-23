@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "apps/mcp-server/src/index.ts": {
-      "includeFiles": "packages/shared/src/**",
+    "src/index.ts": {
+      "includeFiles": "../../packages/shared/src/**",
       "maxDuration": 60
     }
   }
