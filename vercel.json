@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "src/index.ts": {
-      "includeFiles": "../../packages/shared/src/**",
+      "includeFiles": "../../packages/shared/dist/**",
       "maxDuration": 60
     }
   }
